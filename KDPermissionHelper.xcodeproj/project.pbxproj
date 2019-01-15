@@ -13,8 +13,8 @@
 		7D874CBD21ED7DB900909C3B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7D874CBC21ED7DB900909C3B /* Assets.xcassets */; };
 		7D874CC021ED7DB900909C3B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7D874CBE21ED7DB900909C3B /* LaunchScreen.storyboard */; };
 		7D874CC321ED7DB900909C3B /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 7D874CC221ED7DB900909C3B /* main.m */; };
-		7D874CCC21ED81BF00909C3B /* KDPermission.m in Sources */ = {isa = PBXBuildFile; fileRef = 7D874CCB21ED81BF00909C3B /* KDPermission.m */; };
-		7D874CD721ED944200909C3B /* KDPermission.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 7D874CD621ED944200909C3B /* KDPermission.bundle */; };
+		7D874CDC21EDA30300909C3B /* KDPermission.m in Sources */ = {isa = PBXBuildFile; fileRef = 7D874CD921EDA30300909C3B /* KDPermission.m */; };
+		7D874CDD21EDA30300909C3B /* KDPermission.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 7D874CDB21EDA30300909C3B /* KDPermission.bundle */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,9 +28,9 @@
 		7D874CBF21ED7DB900909C3B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		7D874CC121ED7DB900909C3B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7D874CC221ED7DB900909C3B /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		7D874CCA21ED81BF00909C3B /* KDPermission.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KDPermission.h; sourceTree = "<group>"; };
-		7D874CCB21ED81BF00909C3B /* KDPermission.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = KDPermission.m; sourceTree = "<group>"; };
-		7D874CD621ED944200909C3B /* KDPermission.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = KDPermission.bundle; sourceTree = "<group>"; };
+		7D874CD921EDA30300909C3B /* KDPermission.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KDPermission.m; sourceTree = "<group>"; };
+		7D874CDA21EDA30300909C3B /* KDPermission.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KDPermission.h; sourceTree = "<group>"; };
+		7D874CDB21EDA30300909C3B /* KDPermission.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = KDPermission.bundle; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -47,6 +47,7 @@
 		7D874CA721ED7DB700909C3B = {
 			isa = PBXGroup;
 			children = (
+				7D874CD821EDA30300909C3B /* KDPermission */,
 				7D874CB221ED7DB700909C3B /* KDPermissionHelper */,
 				7D874CB121ED7DB700909C3B /* Products */,
 			);
@@ -63,7 +64,6 @@
 		7D874CB221ED7DB700909C3B /* KDPermissionHelper */ = {
 			isa = PBXGroup;
 			children = (
-				7D874CC921ED801B00909C3B /* KDPermission */,
 				7D874CB321ED7DB700909C3B /* AppDelegate.h */,
 				7D874CB421ED7DB700909C3B /* AppDelegate.m */,
 				7D874CB621ED7DB700909C3B /* ViewController.h */,
@@ -77,12 +77,12 @@
 			path = KDPermissionHelper;
 			sourceTree = "<group>";
 		};
-		7D874CC921ED801B00909C3B /* KDPermission */ = {
+		7D874CD821EDA30300909C3B /* KDPermission */ = {
 			isa = PBXGroup;
 			children = (
-				7D874CD621ED944200909C3B /* KDPermission.bundle */,
-				7D874CCA21ED81BF00909C3B /* KDPermission.h */,
-				7D874CCB21ED81BF00909C3B /* KDPermission.m */,
+				7D874CD921EDA30300909C3B /* KDPermission.m */,
+				7D874CDA21EDA30300909C3B /* KDPermission.h */,
+				7D874CDB21EDA30300909C3B /* KDPermission.bundle */,
 			);
 			path = KDPermission;
 			sourceTree = "<group>";
@@ -146,8 +146,8 @@
 			files = (
 				7D874CC021ED7DB900909C3B /* LaunchScreen.storyboard in Resources */,
 				7D874CBD21ED7DB900909C3B /* Assets.xcassets in Resources */,
-				7D874CD721ED944200909C3B /* KDPermission.bundle in Resources */,
 				7D874CBB21ED7DB700909C3B /* Main.storyboard in Resources */,
+				7D874CDD21EDA30300909C3B /* KDPermission.bundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -159,7 +159,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7D874CB821ED7DB700909C3B /* ViewController.m in Sources */,
-				7D874CCC21ED81BF00909C3B /* KDPermission.m in Sources */,
+				7D874CDC21EDA30300909C3B /* KDPermission.m in Sources */,
 				7D874CC321ED7DB900909C3B /* main.m in Sources */,
 				7D874CB521ED7DB700909C3B /* AppDelegate.m in Sources */,
 			);
