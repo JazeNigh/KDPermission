@@ -80,6 +80,7 @@ typedef NS_ENUM(NSInteger, KDAuthorizationStatus)
     {
         _locationManager = nil;
     }
+    
 }
 
 - (BOOL)isGetLibraryPemission
