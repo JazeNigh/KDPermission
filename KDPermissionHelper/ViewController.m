@@ -7,7 +7,7 @@
 //
 
 #import "ViewController.h"
-#import "KDPermission/KDPermission.h"
+#import "KDPermission.h"
 
 @interface ViewController ()
 

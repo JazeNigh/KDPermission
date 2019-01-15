@@ -16,7 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (KDPermission *)helper;
 
 
-@property (nonatomic, assign) BOOL isAutoShowAlert;
+@property (nonatomic, assign) BOOL notAutoShowAlert;
 /**
  是否已获取相册权限
  

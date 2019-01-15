@@ -10,7 +10,6 @@
 #import <Photos/Photos.h>
 #import <AssetsLibrary/AssetsLibrary.h>
 #import <AVFoundation/AVFoundation.h>
-#import "AppDelegate.h"
 #import <Contacts/Contacts.h>
 #import <ContactsUI/ContactsUI.h>
 #import <AddressBookUI/AddressBookUI.h>
@@ -354,7 +353,7 @@ typedef NS_ENUM(NSInteger, KDAuthorizationStatus)
 
 - (void)alertPemissionTip:(NSString *)pemissionType
 {
-    if (!_isAutoShowAlert)
+    if (_notAutoShowAlert)
     {
         return;
     }
@@ -372,7 +371,7 @@ typedef NS_ENUM(NSInteger, KDAuthorizationStatus)
     
     UIAlertAction *actionCancel = [UIAlertAction actionWithTitle:KDPermissionLocal(@"cancel") style:UIAlertActionStyleCancel handler:nil];
     [alertVc addAction:actionCancel];
-    
+     
     [[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:alertVc animated:YES completion:^{
     }];
 }
