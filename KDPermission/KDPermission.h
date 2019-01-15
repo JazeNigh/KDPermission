@@ -15,8 +15,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (KDPermission *)helper;
 
-
+/**
+ 不自动展示权限被拒绝的alert,默认NO是展示,如果想关掉,请设置此属性为YES
+ */
 @property (nonatomic, assign) BOOL notAutoShowAlert;
+
 /**
  是否已获取相册权限
  
@@ -56,8 +59,6 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (BOOL)isGetContactPemission;
 - (void)getContactPemission:(void(^)(BOOL isAuth))completion;
-
-- (void)alertPemissionTip:(NSString *)pemissionType;
 
 @end
 

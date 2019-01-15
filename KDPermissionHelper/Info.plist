@@ -9,9 +9,7 @@
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>若不允许,您将无法上传照片</string>
 	<key>NSContactsUsageDescription</key>
-	<string>若不允许,您将无法将口袋联系人同步至通讯录</string>
-	<key>NSFaceIDUsageDescription</key>
-	<string>若不允许,您将无法刷脸解锁</string>
+	<string>若不允许,您将无法联系人同步至通讯录</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>若不允许,您将无法分享位置信息</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
