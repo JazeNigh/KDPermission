@@ -7,6 +7,7 @@
 //
 
 #import "KDPermission.h"
+#import <UIKit/UIKit.h>
 #import <Photos/Photos.h>
 #import <AssetsLibrary/AssetsLibrary.h>
 #import <AVFoundation/AVFoundation.h>
@@ -14,6 +15,8 @@
 #import <ContactsUI/ContactsUI.h>
 #import <AddressBookUI/AddressBookUI.h>
 #import <CoreLocation/CoreLocation.h>
+#import <UserNotifications/UserNotifications.h>
+
 
 // 需要拼接的本地化格式,str是需要拼接的字符
 #define KDPermissionFormat(key,str) \
@@ -25,6 +28,10 @@ NSLocalizedStringFromTableInBundle(key, @"KDPermission", [NSBundle bundleWithPat
 
 #ifndef IS_IOS9_LATER
 #define IS_IOS9_LATER ([[UIDevice currentDevice].systemVersion doubleValue]>=9.0)
+#endif
+
+#ifndef IS_IOS10_LATER
+#define IS_IOS10_LATER ([[UIDevice currentDevice].systemVersion doubleValue]>=10.0)
 #endif
 
 typedef NS_ENUM(NSInteger, KDAuthorizationStatus)
@@ -62,6 +69,9 @@ typedef NS_ENUM(NSInteger, KDAuthorizationStatus)
     }
     return self;
 }
+
+#pragma mark ====================   block    ====================
+
 // block回调
 - (void)returnBlock:(BOOL)result type:(NSString *)typeName
 {
@@ -69,18 +79,20 @@ typedef NS_ENUM(NSInteger, KDAuthorizationStatus)
         if (self.completion)
         {
             self.completion(result);
-            if (!result)
-            {
-                [self alertPemissionTip:typeName];
-            }
+            self.completion = nil;
         }
-        self.completion = nil;
+        if (!result)
+        {
+            [self alertPemissionTip:typeName];
+        }
     });
     if (_locationManager)
     {
         _locationManager = nil;
     }
 }
+
+#pragma mark ====================   Library    ====================
 
 - (BOOL)isGetLibraryPemission
 {
@@ -118,61 +130,53 @@ typedef NS_ENUM(NSInteger, KDAuthorizationStatus)
             break;
     }
 }
-- (BOOL)isGetLocationPemission
+
+#pragma mark ====================   Camera    ====================
+
+- (BOOL)isGetCameraPemission
 {
-    CLAuthorizationStatus status = [CLLocationManager authorizationStatus];
-    return ((kCLAuthorizationStatusAuthorizedWhenInUse == status) ||
-            (kCLAuthorizationStatusAuthorizedAlways == status));
+    AVAuthorizationStatus status = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
+    return status == AVAuthorizationStatusAuthorized;
 }
-- (void)getLocationPemission:(void (^)(BOOL))completion
+- (void)getCameraPemission:(void(^)(BOOL isAuth))completion
 {
-    NSString *typeName = KDPermissionLocal(@"location");
+    NSString *typeName = KDPermissionLocal(@"camera");
     
     _completion = completion;
     
-    CLAuthorizationStatus status = [CLLocationManager authorizationStatus];
-    switch (status)
-    {
-        case kCLAuthorizationStatusAuthorizedWhenInUse:
-        case kCLAuthorizationStatusAuthorizedAlways:
+    AVAuthorizationStatus status = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
+    
+    switch (status) {
+        case AVAuthorizationStatusAuthorized:
             [self returnBlock:YES type:typeName];
             break;
-        case kCLAuthorizationStatusNotDetermined:
+        case AVAuthorizationStatusDenied:
+        case AVAuthorizationStatusRestricted:
+            [self returnBlock:NO type:typeName];
+            break;
+        case AVAuthorizationStatusNotDetermined:
         {
-            // 未选择
-            _locationManager = [[CLLocationManager alloc] init];
-            _locationManager.distanceFilter = 5;
-            _locationManager.delegate = self;
-            _locationManager.desiredAccuracy = kCLLocationAccuracyBest;
-            //                [locationManager requestWhenInUseAuthorization];
-            if ([_locationManager respondsToSelector:@selector(requestWhenInUseAuthorization)]) {
-                [_locationManager requestWhenInUseAuthorization];
-            }
+            __weak typeof(self) weakSelf = self;
+            [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo
+                                     completionHandler:^(BOOL granted) {
+                [weakSelf returnBlock:granted type:typeName];
+            }];
         }
             break;
-        case kCLAuthorizationStatusRestricted:
-        case kCLAuthorizationStatusDenied:
-        {
-            [self returnBlock:NO type:typeName];
-        } break;
         default:
             [self returnBlock:NO type:typeName];
-        break;
+            break;
     }
 }
 
-- (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status
-{
-    if (_completion && status != kCLAuthorizationStatusNotDetermined)
-    {
-        [self getLocationPemission:_completion];
-    }
-}
+#pragma mark ====================   Audio    ====================
+
 - (BOOL)isGetAudioPemission
 {
     AVAuthorizationStatus status = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeAudio];
     return status == AVAuthorizationStatusAuthorized;
 }
+
 - (void)getAudioPemission:(void(^)(BOOL isAuth))completion
 {
     NSString *typeName = KDPermissionLocal(@"audio");
@@ -202,57 +206,110 @@ typedef NS_ENUM(NSInteger, KDAuthorizationStatus)
     }
 }
 
-- (BOOL)isGetCameraPemission
+#pragma mark ====================   Location    ====================
+
+- (BOOL)isGetLocationPemission
 {
-    AVAuthorizationStatus status = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
-    return status == AVAuthorizationStatusAuthorized;
+    CLAuthorizationStatus status = [CLLocationManager authorizationStatus];
+    return ((kCLAuthorizationStatusAuthorizedWhenInUse == status) ||
+            (kCLAuthorizationStatusAuthorizedAlways == status));
 }
-- (void)getCameraPemission:(void(^)(BOOL isAuth))completion
+- (void)getLocationPemission:(void (^)(BOOL))completion
 {
-    NSString *typeName = KDPermissionLocal(@"camera");
+    NSString *typeName = KDPermissionLocal(@"location");
     
     _completion = completion;
     
-    AVAuthorizationStatus status = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
-    
-    switch (status) {
-        case AVAuthorizationStatusAuthorized:
+    CLAuthorizationStatus status = [CLLocationManager authorizationStatus];
+    switch (status)
+    {
+        case kCLAuthorizationStatusAuthorizedWhenInUse:
+        case kCLAuthorizationStatusAuthorizedAlways:
             [self returnBlock:YES type:typeName];
             break;
-        case AVAuthorizationStatusDenied:
-        case AVAuthorizationStatusRestricted:
-            [self returnBlock:NO type:typeName];
-            break;
-        case AVAuthorizationStatusNotDetermined:
+        case kCLAuthorizationStatusNotDetermined:
         {
-            __weak typeof(self) weakSelf = self;
-            [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
-                [weakSelf returnBlock:granted type:typeName];
-            }];
+            _locationManager = [[CLLocationManager alloc] init];
+            _locationManager.distanceFilter = 5;
+            _locationManager.delegate = self;
+            _locationManager.desiredAccuracy = kCLLocationAccuracyBest;
+            if ([_locationManager respondsToSelector:@selector(requestWhenInUseAuthorization)])
+            {
+                [_locationManager requestWhenInUseAuthorization];
+            }
         }
             break;
+        case kCLAuthorizationStatusRestricted:
+        case kCLAuthorizationStatusDenied:
+        {
+            [self returnBlock:NO type:typeName];
+        } break;
+        default:
+            [self returnBlock:NO type:typeName];
+        break;
+    }
+}
+
+#pragma mark ====================   LocationAlways    ====================
+
+- (BOOL)isGetLocationAlwaysPemission
+{
+    CLAuthorizationStatus status = [CLLocationManager authorizationStatus];
+    return (kCLAuthorizationStatusAuthorizedAlways == status);
+}
+
+- (void)getLocationAlwaysPemission:(void(^)( BOOL isAuth))completion
+{
+    NSString *typeName = KDPermissionLocal(@"location");
+    
+    _completion = completion;
+    
+    CLAuthorizationStatus status = [CLLocationManager authorizationStatus];
+    switch (status)
+    {
+        case kCLAuthorizationStatusAuthorizedWhenInUse:
+            [self returnBlock:YES type:typeName];
+            break;
+        case kCLAuthorizationStatusNotDetermined:
+        {
+            _locationManager = [[CLLocationManager alloc] init];
+            _locationManager.distanceFilter = 5;
+            _locationManager.delegate = self;
+            _locationManager.desiredAccuracy = kCLLocationAccuracyBest;
+            if ([_locationManager respondsToSelector:@selector(requestAlwaysAuthorization)])
+            {
+                [_locationManager requestAlwaysAuthorization];
+            }
+        }
+            break;
+        case kCLAuthorizationStatusRestricted:
+        case kCLAuthorizationStatusDenied:
+        {
+            [self returnBlock:NO type:typeName];
+        } break;
         default:
             [self returnBlock:NO type:typeName];
             break;
     }
 }
 
-/**
- 是否已经获取通讯录权限
- 
- @return 结果
- */
+// CLLocationManagerDelegate
+- (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status
+{
+    if (_completion && status != kCLAuthorizationStatusNotDetermined)
+    {
+        [self getLocationPemission:_completion];
+    }
+}
+
+#pragma mark ====================   Contact    ====================
+
 - (BOOL)isGetContactPemission
 {
     KDAuthorizationStatus status = [self getContactStatus];
     return status == KDAuthorizationStatusAuthorized;
 }
 
-/**
- 通讯录权限状态
- 
- @return 具体的状态
- */
 - (KDAuthorizationStatus)getContactStatus
 {
     if (IS_IOS9_LATER)
@@ -298,6 +355,7 @@ typedef NS_ENUM(NSInteger, KDAuthorizationStatus)
         }
     }
 }
+
 - (void)getContactPemission:(void(^)(BOOL isAuth))completion
 {
     NSString *typeName = KDPermissionLocal(@"addressbook");
@@ -341,7 +399,6 @@ typedef NS_ENUM(NSInteger, KDAuthorizationStatus)
     else
     {
         ABAddressBookRef _abAddressBook = ABAddressBookCreateWithOptions(NULL, NULL);
-        
         ABAddressBookRequestAccessWithCompletion(_abAddressBook, ^(bool granted, CFErrorRef error){
             if (block)
             {
@@ -351,13 +408,68 @@ typedef NS_ENUM(NSInteger, KDAuthorizationStatus)
     }
 }
 
+#pragma mark ====================   Notification    ====================
+
+- (void)getNotificationPermissionBelow10
+{
+    UIUserNotificationSettings *setting = [UIUserNotificationSettings settingsForTypes:(UIUserNotificationTypeAlert|UIUserNotificationTypeBadge|UIUserNotificationTypeSound) categories:nil];
+    
+    [[UIApplication sharedApplication] registerUserNotificationSettings:setting];
+    [[UIApplication sharedApplication] registerForRemoteNotifications];
+}
+
+- (void)getNotificationPermission:(void(^)(BOOL isAuth))completion
+{
+    NSString *typeName = KDPermissionLocal(@"notification");
+    _completion = completion;
+    __weak typeof(self) weakSelf = self;
+    if (!NSClassFromString(@"UNUserNotificationCenter") || !IS_IOS10_LATER)
+    {
+        UIUserNotificationType types = [[UIApplication sharedApplication] currentUserNotificationSettings].types;
+        [self returnBlock:(types != UIUserNotificationTypeNone) type:typeName];
+        return;
+    }
+    
+    UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+    center.delegate = [UIApplication sharedApplication].delegate;
+
+    [center getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings * _Nonnull settings) {
+        switch (settings.authorizationStatus)
+        {
+            case UNAuthorizationStatusAuthorized:
+                [weakSelf returnBlock:YES type:typeName];
+                break;
+                
+            case UNAuthorizationStatusNotDetermined:
+            {
+                // 必须写代理，不然无法监听通知的接收与点击
+                [center requestAuthorizationWithOptions:(UNAuthorizationOptionAlert | UNAuthorizationOptionBadge | UNAuthorizationOptionSound) completionHandler:^(BOOL granted, NSError * _Nullable error) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [[UIApplication sharedApplication] registerForRemoteNotifications];
+                    [weakSelf returnBlock:granted type:typeName];
+                });
+                }];
+            }
+                break;
+            case UNAuthorizationStatusDenied:
+                [weakSelf returnBlock:NO type:typeName];
+                break;
+            default:
+                [weakSelf returnBlock:NO type:typeName];
+                break;
+        }
+    }];
+}
+
+#pragma mark ====================   NoPermissionAlert    ====================
+
+// 没获取到授权,弹出alert引导去系统设置页面
 - (void)alertPemissionTip:(NSString *)pemissionType
 {
-    if (_notAutoShowAlert)
+    if (!_AutoShowAlert)
     {
         return;
     }
-    // 已经拒绝
     NSString *strTip = KDPermissionFormat(@"_get.sys.permission.of", pemissionType);
     UIAlertController *alertVc = [UIAlertController alertControllerWithTitle:nil message:strTip preferredStyle:UIAlertControllerStyleAlert];
     UIAlertAction *actionGoSet = [UIAlertAction actionWithTitle:KDPermissionLocal(@"go.setting") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {

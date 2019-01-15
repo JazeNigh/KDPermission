@@ -28,10 +28,12 @@
     [self addButtonWithSel:@"getLocation" tag:3];
     [self addButtonWithSel:@"getPhoto" tag:4];
     [self addButtonWithSel:@"getAddressBook" tag:5];
+    [self addButtonWithSel:@"getNotification" tag:6];
+
 }
 - (UIButton *)addButtonWithSel:(NSString *)sel tag:(NSInteger)tag
 {
-    UIButton *btn = [[UIButton alloc] initWithFrame:CGRectMake(50, tag*50, 100, 30)];
+    UIButton *btn = [[UIButton alloc] initWithFrame:CGRectMake(50, tag*50, 200, 30)];
     [btn setTitle:sel forState:UIControlStateNormal];
     [btn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     [btn addTarget:self action:NSSelectorFromString(sel) forControlEvents:UIControlEventTouchUpInside];
@@ -67,6 +69,26 @@
     [[KDPermission helper] getContactPemission:^(BOOL isAuth) {
         NSLog(@"method: %@,result,%d",NSStringFromSelector(_cmd),isAuth);
     }];
+}
+- (void)getNotification
+{
+    if ([[UIDevice currentDevice].systemVersion doubleValue]<10.0)
+    {
+        [[KDPermission helper] getNotificationPermissionBelow10];
+        /*
+         after do this you can use
+         [[KDPermission helper] getNotificationPermission:^(BOOL isAuth) {
+         NSLog(@"method: %@,result,%d",NSStringFromSelector(_cmd),isAuth);
+         }];
+         to know is get permission
+         */
+    }
+    else
+    {
+        [[KDPermission helper] getNotificationPermission:^(BOOL isAuth) {
+            NSLog(@"method: %@,result,%d",NSStringFromSelector(_cmd),isAuth);
+        }];
+    }
 }
 
 @end
