@@ -6,8 +6,9 @@ iOS 申请判断系统权限
 #import <KDPermission.h>
 
   调用
-    [[KDPermission helper] getCameraPemission:^(BOOL isAuth) {
     
+    
+    [[KDPermission helper] getCameraPemission:^(BOOL isAuth) {
        
        if (isAuth) 
         {
