@@ -7,9 +7,11 @@ iOS 申请判断系统权限
 
   调用
     [[KDPermission helper] getCameraPemission:^(BOOL isAuth) {
-        if (isAuth)
+    
+       
+       if (isAuth) 
         {
-            NSLog(@"去调起相机");
+         NSLog(@"去调起相机");
         }
     }];
 
