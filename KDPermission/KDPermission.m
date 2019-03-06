@@ -16,6 +16,9 @@
 #import <AddressBookUI/AddressBookUI.h>
 #import <CoreLocation/CoreLocation.h>
 #import <UserNotifications/UserNotifications.h>
+#import <CoreTelephony/CTCellularData.h>
+#import <Speech/SFSpeechRecognitionTaskHint.h>
+#import <Speech/Speech.h>
 
 
 // 需要拼接的本地化格式,str是需要拼接的字符
@@ -75,17 +78,18 @@ typedef NS_ENUM(NSInteger, KDAuthorizationStatus)
 // block回调
 - (void)returnBlock:(BOOL)result type:(NSString *)typeName
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if (self.completion)
-        {
-            self.completion(result);
+    if (self.completion)
+    {
+        self.completion(result);
+        dispatch_async(dispatch_get_main_queue(), ^{
             self.completion = nil;
-        }
-        if (!result)
-        {
-            [self alertPemissionTip:typeName];
-        }
-    });
+        });
+    }
+    if (!result)
+    {
+        [self alertPemissionTip:typeName];
+    }
+
     if (_locationManager)
     {
         _locationManager = nil;
@@ -302,6 +306,59 @@ typedef NS_ENUM(NSInteger, KDAuthorizationStatus)
     }
 }
 
+
+#pragma mark ============================ SpeechRecognizer ============================
+
+
+- (BOOL)isGetSpeechRecognizerPemission
+{
+    if (@available(iOS 10.0, *)) {
+        SFSpeechRecognizerAuthorizationStatus status = [SFSpeechRecognizer authorizationStatus];
+        return status == SFSpeechRecognizerAuthorizationStatusAuthorized;
+    } else {
+        // Fallback on earlier versions
+        return NO;
+    }
+}
+
+- (void)getSpeechRecognizerPemission:(void(^)( BOOL isAuth))completion
+{
+    NSString *typeName = KDPermissionLocal(@"speechRecognizer");
+
+    _completion = completion;
+    
+    if (@available(iOS 10.0, *))
+    {
+        SFSpeechRecognizerAuthorizationStatus status = [SFSpeechRecognizer authorizationStatus];
+        switch (status) {
+            case SFSpeechRecognizerAuthorizationStatusAuthorized:
+                [self returnBlock:YES type:typeName];
+                break;
+            case SFSpeechRecognizerAuthorizationStatusDenied:
+            case SFSpeechRecognizerAuthorizationStatusRestricted:
+                [self returnBlock:NO type:typeName];
+                break;
+            case SFSpeechRecognizerAuthorizationStatusNotDetermined:
+            {
+                __weak typeof(self) weakSelf = self;
+                [SFSpeechRecognizer requestAuthorization:^(SFSpeechRecognizerAuthorizationStatus status)
+                 {
+                     [weakSelf returnBlock:status == SFSpeechRecognizerAuthorizationStatusAuthorized type:typeName];
+                 }];
+            }
+                break;
+            default:
+                [self returnBlock:NO type:typeName];
+                break;
+        }
+    }
+    else
+    {
+        [self returnBlock:NO type:typeName];
+    }
+}
+
+
 #pragma mark ====================   Contact    ====================
 
 - (BOOL)isGetContactPemission
@@ -461,31 +518,57 @@ typedef NS_ENUM(NSInteger, KDAuthorizationStatus)
     }];
 }
 
+- (void)getNetPermission:(void(^)(BOOL isAuth))completion
+{//检查联网权限==系统会自动弹框提示无需自己弄==iOS9以后
+    CTCellularData *cellularData = [[CTCellularData alloc] init];
+    cellularData.cellularDataRestrictionDidUpdateNotifier = ^(CTCellularDataRestrictedState state)
+    {//获取联网状态
+        switch (state)
+        {
+            case kCTCellularDataRestricted:
+                NSLog(@"kCT蜂窝数据限制");
+            break;
+            case kCTCellularDataNotRestricted:
+                NSLog(@"kCT蜂窝数据不受限制的");
+            break;
+            case kCTCellularDataRestrictedStateUnknown:
+                NSLog(@"kCT蜂窝数据限制状态未知");
+            break;
+            default:
+            
+            break;
+                
+        };
+    };
+}
+
 #pragma mark ====================   NoPermissionAlert    ====================
 
 // 没获取到授权,弹出alert引导去系统设置页面
 - (void)alertPemissionTip:(NSString *)pemissionType
 {
-    if (!_AutoShowAlert)
-    {
-        return;
-    }
-    NSString *strTip = KDPermissionFormat(@"_get.sys.permission.of", pemissionType);
-    UIAlertController *alertVc = [UIAlertController alertControllerWithTitle:nil message:strTip preferredStyle:UIAlertControllerStyleAlert];
-    UIAlertAction *actionGoSet = [UIAlertAction actionWithTitle:KDPermissionLocal(@"go.setting") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]])
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (!self->_AutoShowAlert)
         {
-            //跳转到系统设置界面
-            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
+            return;
         }
-    }];
-    [alertVc addAction:actionGoSet];
-    
-    UIAlertAction *actionCancel = [UIAlertAction actionWithTitle:KDPermissionLocal(@"cancel") style:UIAlertActionStyleCancel handler:nil];
-    [alertVc addAction:actionCancel];
-     
-    [[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:alertVc animated:YES completion:^{
-    }];
+        NSString *strTip = KDPermissionFormat(@"_get.sys.permission.of", pemissionType);
+        UIAlertController *alertVc = [UIAlertController alertControllerWithTitle:nil message:strTip preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertAction *actionGoSet = [UIAlertAction actionWithTitle:KDPermissionLocal(@"go.setting") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]])
+            {
+                //跳转到系统设置界面
+                [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
+            }
+        }];
+        [alertVc addAction:actionGoSet];
+        
+        UIAlertAction *actionCancel = [UIAlertAction actionWithTitle:KDPermissionLocal(@"cancel") style:UIAlertActionStyleCancel handler:nil];
+        [alertVc addAction:actionCancel];
+        
+        [[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:alertVc animated:YES completion:^{
+        }];
+    });
 }
 
 @end

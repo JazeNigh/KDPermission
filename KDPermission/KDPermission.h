@@ -58,6 +58,14 @@
 - (BOOL)isGetLocationAlwaysPemission;
 
 /**
+ 获取语音识别权限
+ 
+ @param completion 回调
+ */
+- (void)getSpeechRecognizerPemission:(void(^)( BOOL isAuth))completion API_AVAILABLE(ios(10.0));
+- (BOOL)isGetSpeechRecognizerPemission API_AVAILABLE(ios(10.0));
+
+/**
  获取通讯录权限
 
  @param completion 回调
