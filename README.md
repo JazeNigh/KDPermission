@@ -31,3 +31,5 @@ info.plist必须要添加对应描述
     <string>若不允许,您将无法分享位置信息</string>
     <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
     <string>若不允许,您将无法分享位置信息</string>
+	  <key>NSSpeechRecognitionUsageDescription</key>
+	  <string>若不允许,您将无法语音识别</string>
