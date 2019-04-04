@@ -50,12 +50,12 @@
 - (BOOL)isGetLocationPemission;
 
 /**
- 获取通位置权限(AllTime)
+ 获取通位置权限(WhenInUse)
  
  @param completion 回调
  */
-- (void)getLocationAlwaysPemission:(void(^)( BOOL isAuth))completion;
-- (BOOL)isGetLocationAlwaysPemission;
+- (void)getLocationWhenInUsePemission:(void(^)( BOOL isAuth))completion;
+- (BOOL)isGetLocationWhenInUsePemission;
 
 /**
  获取语音识别权限

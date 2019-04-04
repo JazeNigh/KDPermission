@@ -81,9 +81,6 @@ typedef NS_ENUM(NSInteger, KDAuthorizationStatus)
     if (self.completion)
     {
         self.completion(result);
-        dispatch_async(dispatch_get_main_queue(), ^{
-            self.completion = nil;
-        });
     }
     if (!result)
     {
@@ -107,7 +104,10 @@ typedef NS_ENUM(NSInteger, KDAuthorizationStatus)
 - (void)getLibraryPemission:(void(^)(BOOL isAuth))completion
 {
     NSString *typeName = KDPermissionLocal(@"photos");
+    
+    _completion = nil;
     _completion = completion;
+    
     PHAuthorizationStatus status = [PHPhotoLibrary authorizationStatus];
     switch (status)
     {
@@ -146,6 +146,7 @@ typedef NS_ENUM(NSInteger, KDAuthorizationStatus)
 {
     NSString *typeName = KDPermissionLocal(@"camera");
     
+    _completion = nil;
     _completion = completion;
     
     AVAuthorizationStatus status = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
@@ -185,7 +186,9 @@ typedef NS_ENUM(NSInteger, KDAuthorizationStatus)
 {
     NSString *typeName = KDPermissionLocal(@"audio");
     
+    _completion = nil;
     _completion = completion;
+    
     AVAuthorizationStatus status = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeAudio];
     
     switch (status) {
@@ -222,6 +225,7 @@ typedef NS_ENUM(NSInteger, KDAuthorizationStatus)
 {
     NSString *typeName = KDPermissionLocal(@"location");
     
+    _completion = nil;
     _completion = completion;
     
     CLAuthorizationStatus status = [CLLocationManager authorizationStatus];
@@ -233,14 +237,16 @@ typedef NS_ENUM(NSInteger, KDAuthorizationStatus)
             break;
         case kCLAuthorizationStatusNotDetermined:
         {
-            _locationManager = [[CLLocationManager alloc] init];
-            _locationManager.distanceFilter = 5;
-            _locationManager.delegate = self;
-            _locationManager.desiredAccuracy = kCLLocationAccuracyBest;
-            if ([_locationManager respondsToSelector:@selector(requestWhenInUseAuthorization)])
-            {
-                [_locationManager requestWhenInUseAuthorization];
-            }
+            dispatch_async(dispatch_get_main_queue(), ^{
+                self.locationManager = [[CLLocationManager alloc] init];
+                self.locationManager.distanceFilter = 5;
+                self.locationManager.delegate = self;
+                self.locationManager.desiredAccuracy = kCLLocationAccuracyBest;
+                if ([self.locationManager respondsToSelector:@selector(requestAlwaysAuthorization)])
+                {
+                    [self.locationManager requestAlwaysAuthorization];
+                }
+            });
         }
             break;
         case kCLAuthorizationStatusRestricted:
@@ -256,34 +262,38 @@ typedef NS_ENUM(NSInteger, KDAuthorizationStatus)
 
 #pragma mark ====================   LocationAlways    ====================
 
-- (BOOL)isGetLocationAlwaysPemission
+- (BOOL)isGetLocationWhenInUsePemission
 {
     CLAuthorizationStatus status = [CLLocationManager authorizationStatus];
     return (kCLAuthorizationStatusAuthorizedAlways == status);
 }
 
-- (void)getLocationAlwaysPemission:(void(^)( BOOL isAuth))completion
+- (void)getLocationWhenInUsePemission:(void(^)( BOOL isAuth))completion
 {
     NSString *typeName = KDPermissionLocal(@"location");
     
+    _completion = nil;
     _completion = completion;
     
     CLAuthorizationStatus status = [CLLocationManager authorizationStatus];
     switch (status)
     {
         case kCLAuthorizationStatusAuthorizedWhenInUse:
+        case kCLAuthorizationStatusAuthorizedAlways:
             [self returnBlock:YES type:typeName];
             break;
         case kCLAuthorizationStatusNotDetermined:
         {
-            _locationManager = [[CLLocationManager alloc] init];
-            _locationManager.distanceFilter = 5;
-            _locationManager.delegate = self;
-            _locationManager.desiredAccuracy = kCLLocationAccuracyBest;
-            if ([_locationManager respondsToSelector:@selector(requestAlwaysAuthorization)])
-            {
-                [_locationManager requestAlwaysAuthorization];
-            }
+            dispatch_async(dispatch_get_main_queue(), ^{
+                self.locationManager = [[CLLocationManager alloc] init];
+                self.locationManager.distanceFilter = 5;
+                self.locationManager.delegate = self;
+                self.locationManager.desiredAccuracy = kCLLocationAccuracyBest;
+                if ([self.locationManager respondsToSelector:@selector(requestWhenInUseAuthorization)])
+                {
+                    [self.locationManager requestWhenInUseAuthorization];
+                }
+            });
         }
             break;
         case kCLAuthorizationStatusRestricted:
@@ -325,6 +335,7 @@ typedef NS_ENUM(NSInteger, KDAuthorizationStatus)
 {
     NSString *typeName = KDPermissionLocal(@"speechRecognizer");
 
+    _completion = nil;
     _completion = completion;
     
     if (@available(iOS 10.0, *))
@@ -417,6 +428,7 @@ typedef NS_ENUM(NSInteger, KDAuthorizationStatus)
 {
     NSString *typeName = KDPermissionLocal(@"addressbook");
     
+    _completion = nil;
     _completion = completion;
     
     KDAuthorizationStatus status = [self getContactStatus];
@@ -477,45 +489,50 @@ typedef NS_ENUM(NSInteger, KDAuthorizationStatus)
 
 - (void)getNotificationPermission:(void(^)(BOOL isAuth))completion
 {
-    NSString *typeName = KDPermissionLocal(@"notification");
-    _completion = completion;
-    __weak typeof(self) weakSelf = self;
-    if (!NSClassFromString(@"UNUserNotificationCenter") || !IS_IOS10_LATER)
-    {
-        UIUserNotificationType types = [[UIApplication sharedApplication] currentUserNotificationSettings].types;
-        [self returnBlock:(types != UIUserNotificationTypeNone) type:typeName];
-        return;
-    }
-    
-    UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
-    center.delegate = [UIApplication sharedApplication].delegate;
-
-    [center getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings * _Nonnull settings) {
-        switch (settings.authorizationStatus)
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSString *typeName = KDPermissionLocal(@"notification");
+        
+        _completion = nil;
+        _completion = completion;
+        
+        __weak typeof(self) weakSelf = self;
+        if (!NSClassFromString(@"UNUserNotificationCenter") || !IS_IOS10_LATER)
         {
-            case UNAuthorizationStatusAuthorized:
-                [weakSelf returnBlock:YES type:typeName];
-                break;
-                
-            case UNAuthorizationStatusNotDetermined:
-            {
-                // 必须写代理，不然无法监听通知的接收与点击
-                [center requestAuthorizationWithOptions:(UNAuthorizationOptionAlert | UNAuthorizationOptionBadge | UNAuthorizationOptionSound) completionHandler:^(BOOL granted, NSError * _Nullable error) {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [[UIApplication sharedApplication] registerForRemoteNotifications];
-                    [weakSelf returnBlock:granted type:typeName];
-                });
-                }];
-            }
-                break;
-            case UNAuthorizationStatusDenied:
-                [weakSelf returnBlock:NO type:typeName];
-                break;
-            default:
-                [weakSelf returnBlock:NO type:typeName];
-                break;
+            UIUserNotificationType types = [[UIApplication sharedApplication] currentUserNotificationSettings].types;
+            [self returnBlock:(types != UIUserNotificationTypeNone) type:typeName];
+            return;
         }
-    }];
+        
+        UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+        center.delegate = [UIApplication sharedApplication].delegate;
+        
+        [center getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings * _Nonnull settings) {
+            switch (settings.authorizationStatus)
+            {
+                case UNAuthorizationStatusAuthorized:
+                    [weakSelf returnBlock:YES type:typeName];
+                    break;
+                    
+                case UNAuthorizationStatusNotDetermined:
+                {
+                    // 必须写代理，不然无法监听通知的接收与点击
+                    [center requestAuthorizationWithOptions:(UNAuthorizationOptionAlert | UNAuthorizationOptionBadge | UNAuthorizationOptionSound) completionHandler:^(BOOL granted, NSError * _Nullable error) {
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            [[UIApplication sharedApplication] registerForRemoteNotifications];
+                            [weakSelf returnBlock:granted type:typeName];
+                        });
+                    }];
+                }
+                    break;
+                case UNAuthorizationStatusDenied:
+                    [weakSelf returnBlock:NO type:typeName];
+                    break;
+                default:
+                    [weakSelf returnBlock:NO type:typeName];
+                    break;
+            }
+        }];
+    });
 }
 
 - (void)getNetPermission:(void(^)(BOOL isAuth))completion
@@ -554,7 +571,7 @@ typedef NS_ENUM(NSInteger, KDAuthorizationStatus)
         }
         NSString *strTip = KDPermissionFormat(@"_get.sys.permission.of", pemissionType);
         UIAlertController *alertVc = [UIAlertController alertControllerWithTitle:nil message:strTip preferredStyle:UIAlertControllerStyleAlert];
-        UIAlertAction *actionGoSet = [UIAlertAction actionWithTitle:KDPermissionLocal(@"go.setting") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        UIAlertAction *actionGoSet = [UIAlertAction actionWithTitle:KDPermissionLocal(@"go.set") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]])
             {
                 //跳转到系统设置界面

@@ -18,27 +18,74 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
+    [KDPermission helper].AutoShowAlert = YES;
     [self addViews];
 }
 - (void)addViews
 {
+    [self addButtonWithSel:@"getAll" tag:0];
     [self addButtonWithSel:@"getCamera" tag:1];
     [self addButtonWithSel:@"getAudio" tag:2];
     [self addButtonWithSel:@"getLocation" tag:3];
-    [self addButtonWithSel:@"getPhoto" tag:4];
-    [self addButtonWithSel:@"getAddressBook" tag:5];
-    [self addButtonWithSel:@"getNotification" tag:6];
+    [self addButtonWithSel:@"getLocationWhenInUse" tag:4];
+    [self addButtonWithSel:@"getPhoto" tag:5];
+    [self addButtonWithSel:@"getAddressBook" tag:6];
+    [self addButtonWithSel:@"getNotification" tag:7];
+    [self addButtonWithSel:@"getSpeechRecognizer" tag:8];
 
 }
+
 - (UIButton *)addButtonWithSel:(NSString *)sel tag:(NSInteger)tag
 {
-    UIButton *btn = [[UIButton alloc] initWithFrame:CGRectMake(50, tag*50, 200, 30)];
+    UIButton *btn = [[UIButton alloc] initWithFrame:CGRectMake(50, 100 + tag*50, 200, 30)];
     [btn setTitle:sel forState:UIControlStateNormal];
     [btn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     [btn addTarget:self action:NSSelectorFromString(sel) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:btn];
     return btn;
+}
+
+- (void)getAll
+{
+    [[KDPermission helper] getCameraPemission:^(BOOL isAuth) {
+        NSLog(@"getCameraPemission: %@,result,%d",NSStringFromSelector(_cmd),isAuth);
+        if (isAuth)
+        {
+            [[KDPermission helper] getAudioPemission:^(BOOL isAuth) {
+                NSLog(@"getAudioPemission: %@,result,%d",NSStringFromSelector(_cmd),isAuth);
+                if (isAuth)
+                {
+                    [[KDPermission helper] getLocationPemission:^(BOOL isAuth) {
+                        NSLog(@"getLocationPemission: %@,result,%d",NSStringFromSelector(_cmd),isAuth);
+                        if (isAuth)
+                        {
+                            [[KDPermission helper] getLibraryPemission:^(BOOL isAuth) {
+                                NSLog(@"getLibraryPemission: %@,result,%d",NSStringFromSelector(_cmd),isAuth);
+                                if (isAuth)
+                                {
+                                    [[KDPermission helper] getContactPemission:^(BOOL isAuth) {
+                                        NSLog(@"getContactPemission: %@,result,%d",NSStringFromSelector(_cmd),isAuth);
+                                        if (isAuth)
+                                        {
+                                            [[KDPermission helper] getSpeechRecognizerPemission:^(BOOL isAuth) {
+                                                NSLog(@"getSpeechRecognizerPemission: %@,result,%d",NSStringFromSelector(_cmd),isAuth);
+                                                if (isAuth)
+                                                {
+                                                    [[KDPermission helper] getNotificationPermission:^(BOOL isAuth) {
+                                                        NSLog(@"getNotificationPermission: %@,result,%d",NSStringFromSelector(_cmd),isAuth);
+                                                    }];
+                                                }
+                                            }];
+                                        }
+                                    }];
+                                }
+                            }];
+                        }
+                    }];
+                }
+            }];
+        }
+    }];
 }
 - (void)getCamera
 {
@@ -58,6 +105,12 @@
         NSLog(@"method: %@,result,%d",NSStringFromSelector(_cmd),isAuth);
     }];
 }
+- (void)getLocationWhenInUse
+{
+    [[KDPermission helper] getLocationWhenInUsePemission:^(BOOL isAuth) {
+        NSLog(@"method: %@,result,%d",NSStringFromSelector(_cmd),isAuth);
+    }];
+}
 - (void)getPhoto
 {
     [[KDPermission helper] getLibraryPemission:^(BOOL isAuth) {
@@ -70,6 +123,13 @@
         NSLog(@"method: %@,result,%d",NSStringFromSelector(_cmd),isAuth);
     }];
 }
+- (void)getSpeechRecognizer
+{
+    [[KDPermission helper] getSpeechRecognizerPemission:^(BOOL isAuth) {
+        NSLog(@"method: %@,result,%d",NSStringFromSelector(_cmd),isAuth);
+    }];
+}
+
 - (void)getNotification
 {
     if ([[UIDevice currentDevice].systemVersion doubleValue]<10.0)
