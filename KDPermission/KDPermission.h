@@ -10,6 +10,12 @@
 
 @interface KDPermission : NSObject
 
+
+/**
+ 单例
+
+ @return 单例
+ */
 + (KDPermission *)helper;
 
 /**
@@ -22,56 +28,74 @@
  
  @param completion 回调
  */
-- (void)getLibraryPemission:(void(^)( BOOL isAuth))completion;
-- (BOOL)isGetLibraryPemission;
+- (void)getLibraryPermission:(void(^)( BOOL isAuth))completion;
+- (BOOL)isGetLibraryPermission;
 
 /**
  获取通相机权限
  
  @param completion 回调
  */
-- (void)getCameraPemission:(void(^)(BOOL isAuth))completion;
-- (BOOL)isGetCameraPemission;
+- (void)getCameraPermission:(void(^)(BOOL isAuth))completion;
+- (BOOL)isGetCameraPermission;
 
 /**
  获取通麦克风权限
  
  @param completion 回调
  */
-- (void)getAudioPemission:(void(^)(BOOL isAuth))completion;
-- (BOOL)isGetAudioPemission;
+- (void)getAudioPermission:(void(^)(BOOL isAuth))completion;
+- (BOOL)isGetAudioPermission;
 
 /**
  获取通位置权限
  
  @param completion 回调
  */
-- (void)getLocationPemission:(void(^)( BOOL isAuth))completion;
-- (BOOL)isGetLocationPemission;
+- (void)getLocationPermission:(void(^)( BOOL isAuth))completion;
+- (BOOL)isGetLocationPermission;
 
 /**
  获取通位置权限(WhenInUse)
  
  @param completion 回调
  */
-- (void)getLocationWhenInUsePemission:(void(^)( BOOL isAuth))completion;
-- (BOOL)isGetLocationWhenInUsePemission;
+- (void)getLocationWhenInUsePermission:(void(^)( BOOL isAuth))completion;
+- (BOOL)isGetLocationWhenInUsePermission;
 
 /**
  获取语音识别权限
  
  @param completion 回调
  */
-- (void)getSpeechRecognizerPemission:(void(^)( BOOL isAuth))completion API_AVAILABLE(ios(10.0));
-- (BOOL)isGetSpeechRecognizerPemission API_AVAILABLE(ios(10.0));
+- (void)getSpeechRecognizerPermission:(void(^)( BOOL isAuth))completion API_AVAILABLE(ios(10.0));
+- (BOOL)isGetSpeechRecognizerPermission API_AVAILABLE(ios(10.0));
 
 /**
  获取通讯录权限
-
+ 
  @param completion 回调
  */
-- (void)getContactPemission:(void(^)(BOOL isAuth))completion;
-- (BOOL)isGetContactPemission;
+- (void)getContactPermission:(void(^)(BOOL isAuth))completion;
+- (BOOL)isGetContactPermission;
+
+/**
+ 获取日历权限
+ 
+ @param completion 回调
+ */
+- (void)getCalendarPermission:(void(^)(BOOL isAuth))completion;
+- (BOOL)isGetCalendarPermission;
+
+#pragma mark ====================   Reminder    ====================
+
+/**
+ 获取提醒事项权限
+ 
+ @param completion 回调
+ */
+- (void)getReminderPermission:(void(^)(BOOL isAuth))completion;
+- (BOOL)isGetReminderPermission;
 
 /**
  获取通知权限

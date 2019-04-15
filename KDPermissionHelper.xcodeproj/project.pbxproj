@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7D3B13E92264599200240875 /* PermissionTestVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 7D3B13E82264599200240875 /* PermissionTestVC.m */; };
 		7D874CB521ED7DB700909C3B /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 7D874CB421ED7DB700909C3B /* AppDelegate.m */; };
 		7D874CB821ED7DB700909C3B /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7D874CB721ED7DB700909C3B /* ViewController.m */; };
 		7D874CBB21ED7DB700909C3B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7D874CB921ED7DB700909C3B /* Main.storyboard */; };
@@ -18,6 +19,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		7D3B13E72264599200240875 /* PermissionTestVC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PermissionTestVC.h; sourceTree = "<group>"; };
+		7D3B13E82264599200240875 /* PermissionTestVC.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PermissionTestVC.m; sourceTree = "<group>"; };
 		7D874CB021ED7DB700909C3B /* KDPermissionHelper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KDPermissionHelper.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7D874CB321ED7DB700909C3B /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		7D874CB421ED7DB700909C3B /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -68,6 +71,8 @@
 				7D874CB421ED7DB700909C3B /* AppDelegate.m */,
 				7D874CB621ED7DB700909C3B /* ViewController.h */,
 				7D874CB721ED7DB700909C3B /* ViewController.m */,
+				7D3B13E72264599200240875 /* PermissionTestVC.h */,
+				7D3B13E82264599200240875 /* PermissionTestVC.m */,
 				7D874CB921ED7DB700909C3B /* Main.storyboard */,
 				7D874CBC21ED7DB900909C3B /* Assets.xcassets */,
 				7D874CBE21ED7DB900909C3B /* LaunchScreen.storyboard */,
@@ -80,8 +85,8 @@
 		7D874CD821EDA30300909C3B /* KDPermission */ = {
 			isa = PBXGroup;
 			children = (
-				7D874CD921EDA30300909C3B /* KDPermission.m */,
 				7D874CDA21EDA30300909C3B /* KDPermission.h */,
+				7D874CD921EDA30300909C3B /* KDPermission.m */,
 				7D874CDB21EDA30300909C3B /* KDPermission.bundle */,
 			);
 			path = KDPermission;
@@ -162,6 +167,7 @@
 				7D874CDC21EDA30300909C3B /* KDPermission.m in Sources */,
 				7D874CC321ED7DB900909C3B /* main.m in Sources */,
 				7D874CB521ED7DB700909C3B /* AppDelegate.m in Sources */,
+				7D3B13E92264599200240875 /* PermissionTestVC.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -322,8 +328,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = MPXZ3AAD6Q;
 				INFOPLIST_FILE = KDPermissionHelper/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -332,7 +339,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.kd.permission.KDPermissionHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE_SPECIFIER = AllProduct_inHouse_MeetProvisoining;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;

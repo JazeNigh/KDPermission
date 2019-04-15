@@ -16,20 +16,32 @@ iOS 申请判断系统权限
         }
     }];
 
-block回调注意线程转换
+block回调
+
+
+注意线程转换
+注意循环引用
+
 info.plist必须要添加对应描述
 
-    <key>NSCameraUsageDescription</key>
-    <string>若不允许,您将无法拍摄照片和视频,也无法使用视频通话和扫码功能</string>
-    <key>NSMicrophoneUsageDescription</key>
-    <string>若不允许,您将无法发送语音消息或进行音视频通话</string>
-    <key>NSPhotoLibraryUsageDescription</key>
-    <string>若不允许,您将无法上传照片</string>
-    <key>NSContactsUsageDescription</key>
-    <string>若不允许,您将无法同步至通讯录</string>
-    <key>NSLocationWhenInUseUsageDescription</key>
-    <string>若不允许,您将无法分享位置信息</string>
-    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-    <string>若不允许,您将无法分享位置信息</string>
-	  <key>NSSpeechRecognitionUsageDescription</key>
-	  <string>若不允许,您将无法语音识别</string>
+<string>App需要您的同意,才能访问日历</string>
+<key>NSCameraUsageDescription</key>
+<string>App需要您的同意,才能访问相机</string>
+<key>NSLocationAlwaysUsageDescription</key>
+<string>App需要您的同意,才能始终访问位置</string>
+<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+<string>App需要您的同意,才能在使用期间访问位置</string>
+<key>NSLocationUsageDescription</key>
+<string>App需要您的同意,才能访问位置</string>
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>App需要您的同意,才能在使用期间访问位置</string>
+<key>NSMicrophoneUsageDescription</key>
+<string>App需要您的同意,才能访问麦克风</string>
+<key>NSSpeechRecognitionUsageDescription</key>
+<string>App需要您的同意,才能访问语音识别</string>
+<key>NSContactsUsageDescription</key>
+<string>App需要您的同意,才能访问通讯录</string>
+<key>NSPhotoLibraryUsageDescription</key>
+<string>App需要您的同意,才能访问相册</string>
+<key>NSRemindersUsageDescription</key>
+<string>App需要您的同意,才能访问提醒事项</string>
